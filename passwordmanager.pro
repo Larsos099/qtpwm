@@ -26,8 +26,8 @@ FORMS += \
     mainwindow.ui
 INCLUDEPATH += $$PWD
 QTPLUGIN += qsqloci qgif
-LIBS += -L/usr/local/opt/openssl/lib -lcrypto
-INCLUDEPATH += /usr/local/opt/openssl/include
+LIBS += -L$$PWD/OpenSSL/lib -lcrypto
+INCLUDEPATH += $$PWD/OpenSSL/include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
