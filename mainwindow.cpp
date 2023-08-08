@@ -13,7 +13,7 @@
 #include <string>
 #include <iostream>
 #include <QString>
-#include <openssl/ssl.h>
+#include <openssl/evp.h>
 #define KEYLENGTH 24
 QString homedir = "";
 
@@ -110,11 +110,13 @@ void MainWindow::on_close_triggered()
 
 void MainWindow::on_save_file_triggered()
 {
+    QInputDialog qin;
     QListWidget* services = ui->services;
     std::string Sunpadded_password;
     QString Qunpadded_password;
     QString unencrypted;
     std::string encData;
+    QString unencData;
     QListWidget* passwords = ui->passwords;
     QString serviceItems[services->count()];
     QString passwordItems[passwords->count()];
@@ -127,7 +129,7 @@ void MainWindow::on_save_file_triggered()
     QFileDialog explorer;
     QFile savefile = explorer.getSaveFileName(this, "Datei Speichern", homedir, "Password-Manager Files (*.pwm)");
     savefile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
-    QTextStream streamout(&savefile);
+    QTextStream streamout(&unencData);
     streamout << "PW;";
     for(int i = 0; i < passwords->count(); ++i){
         if( i < passwords->count()-1){
@@ -148,7 +150,9 @@ void MainWindow::on_save_file_triggered()
             streamout << serviceItems[i];
     }
 }
-
+    QString encPassword = "";
+// OpenSSL MAX AES = 256
+encPassword = qin.getText(this, "Gebe ein Sicheres Master Passwort ein", "Master-Passwort (MAX 24 LETTERS): ", QLineEdit::Normal, "12345678");
 
 }
 /*

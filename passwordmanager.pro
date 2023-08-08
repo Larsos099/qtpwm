@@ -20,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     encrypt.h \
+    encrypt.h \
     mainwindow.h
 
 FORMS += \
