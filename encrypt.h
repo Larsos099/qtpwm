@@ -20,7 +20,7 @@ bool encrypt192(unsigned char keydata[KEYLENGTH], unsigned char* salt, unsigned 
         return false;
     }
 
-    EVP_CIPHER_CTX* e = nullptr;
+    EVP_CIPHER_CTX* e;
     EVP_CIPHER_CTX_init(e);
     EVP_EncryptInit(e, EVP_aes_192_cbc(), key, iv);
 
