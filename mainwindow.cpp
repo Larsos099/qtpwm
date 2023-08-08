@@ -14,6 +14,8 @@
 #include <iostream>
 #include <QString>
 #define KEYLENGTH 24
+QString homedir = "";
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
@@ -26,6 +28,21 @@ MainWindow::MainWindow(QWidget *parent)
     ui->services->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->passwords->setSelectionBehavior( QAbstractItemView::SelectItems );
     ui->passwords->setSelectionMode(QAbstractItemView::SingleSelection);
+#ifdef Q_OS_WIN
+#include <windows.h>
+    char userProfile[MAX_PATH];
+    if (GetEnvironmentVariable("USERPROFILE", userProfile, sizeof(userProfile))) {
+        homedir = QString::fromUtf8(userProfile);
+    }
+#endif
+
+#ifdef Q_OS_MACX
+    homedir = QString::fromUtf8(qgetenv("HOME"));
+#endif
+
+#ifdef Q_OS_LINUX
+    homedir = QString::fromUtf8(qgetenv("HOME"));
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -44,10 +61,13 @@ void MainWindow::on_open_file_triggered()
     passwords->clear();
     QStringList contentList;
     QFileDialog explorer;
-    QFile file(explorer.getOpenFileName(this, "Dateien Öffnen", "", tr("Password-Manager Files (*.pwm)"))); // Bekommt den Dateiname der Ausgewählten Datei.
-    file.open(QIODevice::ReadWrite); // Öffnet die Datei in Lese/Schreib Modus als Text.
-    QTextStream stream(&file); // Das & von &file bedeutet dass es zur Speicheradresse der Datei zeigt. Nicht zur Datei.
-    decryptedData = file.readAll();
+    QString fln = explorer.getOpenFileName(this, "Wähle eine Speicherdatei aus", homedir);
+                  qInfo() << fln;
+    QFile fl(fln);
+                  fl.open(QIODevice::ReadWrite | QIODevice::Text);
+                  QTextStream s(&fl);
+                  decryptedData = s.readAll();
+    qInfo() << decryptedData;
     contentList = decryptedData.split("PW;");
     qInfo() << contentList;
     decryptedData = contentList.join("");
@@ -106,10 +126,7 @@ void MainWindow::on_save_file_triggered()
     QFileDialog explorer;
     QFile savefile = explorer.getSaveFileName(this, "Datei Speichern", "", "Password-Manager Files (*.pwm)");
     savefile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
-    for(int i = 0; i < services->count(); ++i){
-
-    }
-    QTextStream streamout(&unencrypted);
+    QTextStream streamout(&savefile);
     streamout << "PW;";
     for(int i = 0; i < passwords->count(); ++i){
         if( i < passwords->count()-1){
@@ -130,10 +147,7 @@ void MainWindow::on_save_file_triggered()
             streamout << serviceItems[i];
     }
 }
-    QInputDialog inp;
-    Qunpadded_password = inp.getText(this, "Passwort", "Suchen sie sich ein sicheres und Langes Passwort aus!");
-    Sunpadded_password = Qunpadded_password.toStdString();
-    qInfo() << unencrypted;
+
 
 }
 /*
