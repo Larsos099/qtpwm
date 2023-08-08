@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <QString>
+#include <openssl/ssl.h>
 #define KEYLENGTH 24
 QString homedir = "";
 
@@ -124,7 +125,7 @@ void MainWindow::on_save_file_triggered()
         passwordItems[i] = passwords->item(i)->text();
     }
     QFileDialog explorer;
-    QFile savefile = explorer.getSaveFileName(this, "Datei Speichern", "", "Password-Manager Files (*.pwm)");
+    QFile savefile = explorer.getSaveFileName(this, "Datei Speichern", homedir, "Password-Manager Files (*.pwm)");
     savefile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
     QTextStream streamout(&savefile);
     streamout << "PW;";
@@ -176,7 +177,7 @@ QString GetRandomPassword(int length = 10){
     QString randomString;
     for(int i=0; i<length; ++i)
     {
-        int index = rand() % possibleCharacters.length();
+        int index = arc4random() % possibleCharacters.length();
         QChar nextChar = possibleCharacters.at(index);
         randomString.append(nextChar);
     }
@@ -237,7 +238,7 @@ void MainWindow::on_changeenty_clicked()
         QInputDialog inputdiag;
         newc = inputdiag.getText(this, "PASSWORT ÄNDERN", "Bitte das neue Passwort für " + services->item(row)->text());
         selected->setText(newc);
-        selected = NULL;
+        selected = nullptr;
         delete selected;
 
     }
