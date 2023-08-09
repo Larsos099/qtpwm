@@ -41,33 +41,6 @@ QString encrypt192(QString key, QString data){
         return "";
     }
 
-
-
 }
-QString decrypt192(QString data, QString key){
-    QString final = "";
-    QString ivString = data.left(AES::BLOCKSIZE);
-    data.remove(ivString);
-    QByteArray dataAsByteArray = data.toUtf8();
-    QByteArray ivAsByteArray = ivString.toUtf8();
-    QByteArray keyAsByteArray = key.toUtf8();
-    SecByteBlock dataAsSecByteBlock(reinterpret_cast<const byte*>(dataAsByteArray.data()), dataAsByteArray.size());
-    SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsByteArray.data()), keyAsByteArray.size());
-    SecByteBlock iv(reinterpret_cast<const byte*>(ivAsByteArray.data()), ivAsByteArray.size());
-
-    CBC_Mode<AES>::Decryption d;
-    d.SetKeyWithIV(keyAsSecByteBlock, klen, iv);
-
-    SecByteBlock decryptedData(data.size());
-    d.ProcessData(decryptedData, dataAsSecByteBlock, dataAsByteArray.size());
-
-    const byte paddingByte = decryptedData[decryptedData.size() - 1];
-    size_t paddingSize = paddingByte;
-    decryptedData.resize(decryptedData.size() - paddingSize);
-
-    final = QString::fromUtf8(reinterpret_cast<const char*>(decryptedData.data()), decryptedData.size());
-    return final;
-}
-
 
 #endif // ENCRYPT_H

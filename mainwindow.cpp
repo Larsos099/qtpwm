@@ -57,8 +57,6 @@ void MainWindow::on_open_file_triggered()
     QListWidget* services = ui->services;
     QListWidget* passwords = ui->passwords;
     QString decryptedData;
-    QString master;
-    QString encData;
     services->clear();
     passwords->clear();
     QStringList contentList;
@@ -68,11 +66,8 @@ void MainWindow::on_open_file_triggered()
     QFile fl(fln);
                   fl.open(QIODevice::ReadWrite | QIODevice::Text);
                   QTextStream s(&fl);
-                  encData = s.readAll();
-    QInputDialog::getText(this, "MASTER PASSWORT EINGEBEN", "GEBE DAS MASTER PASSWORT FÜr DIESE DATEI EIN:", QLineEdit::Normal, "12345678");
-    decryptedData = decrypt192(encData, master);
+                  decryptedData = s.readAll();
     qInfo() << decryptedData;
-    return;
     contentList = decryptedData.split("PW;");
     qInfo() << contentList;
     decryptedData = contentList.join("");
@@ -158,7 +153,6 @@ void MainWindow::on_save_file_triggered()
     streamout.flush();
     streamout.setDevice(&savefile);
     streamout << encData;
-    streamout.flush();
 }
 /*
     QListWidget* services = ui->services;
