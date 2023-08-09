@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "encrypt.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QTextStream>
@@ -13,8 +14,6 @@
 #include <string>
 #include <iostream>
 #include <QString>
-#include <openssl/evp.h>
-#define KEYLENGTH 24
 QString homedir = "";
 
 MainWindow::MainWindow(QWidget *parent)
@@ -112,10 +111,7 @@ void MainWindow::on_save_file_triggered()
 {
     QInputDialog qin;
     QListWidget* services = ui->services;
-    std::string Sunpadded_password;
-    QString Qunpadded_password;
-    QString unencrypted;
-    std::string encData;
+    QString encData;
     QString unencData;
     QListWidget* passwords = ui->passwords;
     QString serviceItems[services->count()];
@@ -151,9 +147,12 @@ void MainWindow::on_save_file_triggered()
     }
 }
     QString encPassword = "";
-// OpenSSL MAX AES = 256
-encPassword = qin.getText(this, "Gebe ein Sicheres Master Passwort ein", "Master-Passwort (MAX 24 LETTERS): ", QLineEdit::Normal, "12345678");
-
+    encPassword = qin.getText(this, "Gebe ein Sicheres Master Passwort ein", "Master-Passwort (MAX 24 LETTERS): ", QLineEdit::Normal, "12345678");
+    qInfo() << encrypt192(encPassword, unencData);
+    encData = encrypt192(encPassword, unencData);
+    streamout.flush();
+    streamout.setDevice(&savefile);
+    streamout << encData;
 }
 /*
     QListWidget* services = ui->services;

@@ -20,16 +20,14 @@ SOURCES += \
 
 HEADERS += \
     encrypt.h \
-    encrypt.h \
     mainwindow.h
 
 FORMS += \
     mainwindow.ui
-INCLUDEPATH += $$PWD
-QTPLUGIN += qsqloci qgif
-LIBS += -L$$PWD/OpenSSL/lib -lcrypto
-INCLUDEPATH += $$PWD/OpenSSL/include
 
+QTPLUGIN += qsqloci qgif
+LIBS += -L$$PWD/lib -lcryptopp
+INCLUDEPATH += $$PWD
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
