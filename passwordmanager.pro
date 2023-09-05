@@ -26,7 +26,7 @@ FORMS += \
     mainwindow.ui
 
 QTPLUGIN += qsqloci qgif
-LIBS += -L$$PWD/lib -lcryptopp
+LIBS += -L$$PWD/CryptoPP/lib -lcryptopp
 INCLUDEPATH += $$PWD
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
