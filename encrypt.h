@@ -43,10 +43,10 @@ QString encrypt192(QString key, QString data) {
         encoder.MessageEnd();
         final = QString::fromStdString(prefinal);
         return final;
-    } catch (...) {
+    } catch (CryptoPP::Exception &ex) {
         qWarning() << "Something failed.";
         QMessageBox qmsgb;
-        qmsgb.setText("Something in the Encryption Process Failed.");
+        qmsgb.setText("CryptoPP Exception: " + QString(ex.what()));
         return "";
     }
 }
@@ -54,26 +54,41 @@ QString encrypt192(QString key, QString data) {
 QString decrypt192(QString data, QString key) {
     QString final;
     QByteArray keyAsBytes = key.toUtf8();
-    if(keyAsBytes.size() < 24){
-        keyAsBytes.resize(24, 0);
+    try {
+        if(keyAsBytes.size() < 24){
+            keyAsBytes.resize(24, 0);
+        }
+    } catch (...) {
+        QMessageBox qmsgb;
+        qmsgb.setText("Padding process in decrypt192() failed.");
     }
 
-    SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsBytes.constData()), keyAsBytes.size());
-    CBC_Mode<AES>::Decryption d;
-    std::string unhexed;
-    HexDecoder hexd(new StringSink(unhexed));
-    hexd.Put(reinterpret_cast<const byte*>(data.toUtf8().data()), data.toUtf8().size());
-    hexd.MessageEnd();
-    QString IVasString = QString::fromStdString(unhexed).left(AES::BLOCKSIZE);
-    SecByteBlock IV(reinterpret_cast<const byte*>(IVasString.toUtf8().data()), IVasString.toUtf8().size());
-    d.SetKeyWithIV(keyAsSecByteBlock, klen, IV);
-    QString stage1 = QString::fromStdString(unhexed).remove(IVasString);
-    SecByteBlock decrypted(stage1.toUtf8().size());
-    d.ProcessData(decrypted, reinterpret_cast<const byte*>(stage1.toUtf8().data()), stage1.toUtf8().size());
-    QByteArray stage2 = reinterpret_cast<const char*>(decrypted.data());
-    QString stage3 = QString::fromUtf8(stage2);
-    final = stage3;
-    return final;
+
+    try {
+        SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsBytes.constData()), keyAsBytes.size());
+        CBC_Mode<AES>::Decryption d;
+        std::string unhexed;
+        HexDecoder hexd(new StringSink(unhexed));
+        hexd.Put(reinterpret_cast<const byte*>(data.toUtf8().data()), data.toUtf8().size());
+        hexd.MessageEnd();
+        QString IVasString = QString::fromStdString(unhexed).left(AES::BLOCKSIZE);
+        SecByteBlock IV(reinterpret_cast<const byte*>(IVasString.toUtf8().data()), IVasString.toUtf8().size());
+        d.SetKeyWithIV(keyAsSecByteBlock, klen, IV);
+        QString stage1 = QString::fromStdString(unhexed).remove(IVasString);
+        SecByteBlock decrypted(stage1.toUtf8().size());
+        d.ProcessData(decrypted, reinterpret_cast<const byte*>(stage1.toUtf8().data()), stage1.toUtf8().size());
+        QByteArray stage2 = reinterpret_cast<const char*>(decrypted.data());
+        QString stage3 = QString::fromUtf8(stage2);
+        final = stage3;
+        return final;
+
+    } catch (CryptoPP::Exception &ex) {
+        QMessageBox qmsgb;
+        qmsgb.setText("CryptoPP Exception: " + QString(ex.what()));
+        return "";
+
+    }
+
 
 }
 
