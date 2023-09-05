@@ -12,21 +12,30 @@
 #include <CryptoPP/osrng.h>
 #include <CryptoPP/hex.h>
 using namespace CryptoPP;
-QString encrypt192(QString key, QString data){
+QString encrypt192(QString key, QString data) {
     try {
         AutoSeededRandomPool srp;
         SecByteBlock iv(AES::BLOCKSIZE);
         srp.GenerateBlock(iv, iv.size());
+
         QByteArray keyAsBytes = key.toUtf8();
-        SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsBytes.data()), keyAsBytes.size());
+        if (keyAsBytes.size() < 24) {
+            // Pad the key with zeros to reach the required size
+            keyAsBytes.resize(24, 0);
+        }
+
+        // Initialize the key using the byte data
+        SecByteBlock keyAsSecByteBlock;
+        keyAsSecByteBlock.Assign(reinterpret_cast<const byte*>(keyAsBytes.data()), keyAsBytes.size());
+
         CBC_Mode<AES>::Encryption e;
-        e.SetKeyWithIV(keyAsSecByteBlock, klen, iv);
+        e.SetKeyWithIV(keyAsSecByteBlock, keyAsSecByteBlock.size(), iv);
         SecByteBlock encrypted(data.size());
         QByteArray dataAsBytes = data.toUtf8();
         e.ProcessData(encrypted, reinterpret_cast<const byte*>(dataAsBytes.data()), dataAsBytes.size());
         QByteArray combined;
-        combined.append(iv);
-        combined.append(encrypted);
+        combined.append(reinterpret_cast<const char*>(iv.data()), AES::BLOCKSIZE);
+        combined.append(reinterpret_cast<const char*>(encrypted.data()), encrypted.size());
         QString final;
         std::string prefinal;
         HexEncoder encoder(new StringSink(prefinal));
@@ -40,28 +49,38 @@ QString encrypt192(QString key, QString data){
         qmsgb.setText("Something in the Encryption Process Failed.");
         return "";
     }
-
-
-
 }
-QString decrypt192(QString data, QString key){
-    QString final = "";
-    QString ivString = data.left(AES::BLOCKSIZE);
-    data.remove(ivString);
-    QByteArray dataAsByteArray = data.toUtf8();
-    QByteArray ivAsByteArray = ivString.toUtf8();
-    QByteArray keyAsByteArray = key.toUtf8();
-    SecByteBlock dataAsSecByteBlock(reinterpret_cast<const byte*>(dataAsByteArray.data()), dataAsByteArray.size());
-    SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsByteArray.data()), keyAsByteArray.size());
-    SecByteBlock iv(reinterpret_cast<const byte*>(ivAsByteArray.data()), ivAsByteArray.size());
+
+QString decrypt192(QString data, QString key) {
+    QString final;
+
+    if(key.toUtf8().size() < 24){
+        key.toUtf8().resize(24, 0);
+    }
+    QByteArray keyAsBytes = key.toUtf8();
+    SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsBytes.constData()), keyAsBytes.size());
     CBC_Mode<AES>::Decryption d;
-    d.SetKeyWithIV(keyAsSecByteBlock, klen, iv);
-    SecByteBlock f(data.size());
-    d.ProcessData(f, dataAsSecByteBlock, dataAsByteArray.size());
-    QByteArray prefinal(reinterpret_cast<const char*>(f.data()), f.size());
-    std::string stage1;
+    std::string unhexed;
+    HexDecoder hexd(new StringSink(unhexed));
+    hexd.Put(reinterpret_cast<const byte*>(data.toUtf8().data()), data.toUtf8().size());
+    hexd.MessageEnd();
+    QString IVasString = QString::fromStdString(unhexed).left(AES::BLOCKSIZE);
+    SecByteBlock IV(reinterpret_cast<const byte*>(IVasString.toUtf8().data()), IVasString.toUtf8().size());
+    d.SetKeyWithIV(keyAsSecByteBlock, klen, IV);
+    QString stage1 = QString::fromStdString(unhexed).remove(IVasString);
+    SecByteBlock decrypted(stage1.toUtf8().size());
+    d.ProcessData(decrypted, reinterpret_cast<const byte*>(stage1.toUtf8().data()), stage1.toUtf8().size());
+    QByteArray stage2 = reinterpret_cast<const char*>(decrypted.data());
+    QString stage3 = QString::fromUtf8(stage2);
+    final = stage3;
+    return final;
 
-        return final;
 }
+
+
+
+
+
+
 
 #endif // ENCRYPT_H
