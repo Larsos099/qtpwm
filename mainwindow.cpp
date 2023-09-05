@@ -72,9 +72,8 @@ void MainWindow::on_open_file_triggered()
                   QTextStream s(&fl);
                   encData = s.readAll();
     master = QInputDialog::getText(this, "MASTER PASSWORT EINGEBEN", "GEBE DAS MASTER PASSWORT FÜr DIESE DATEI EIN:", QLineEdit::Normal, "12345678");
-    t = encrypt192("anus", "abcd");
-    QString z = decrypt192(t, "anus");
-    qDebug() << z;
+                      decryptedData = decrypt192(encData, master);
+    qInfo() << decryptedData;
     return;
     contentList = decryptedData.split("PW;");
     qInfo() << contentList;
