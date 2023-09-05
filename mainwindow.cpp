@@ -15,7 +15,7 @@
 #include <iostream>
 #include <QString>
 QString homedir = "";
-
+// diese von kaan
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
