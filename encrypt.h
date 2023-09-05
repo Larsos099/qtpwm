@@ -53,11 +53,11 @@ QString encrypt192(QString key, QString data) {
 
 QString decrypt192(QString data, QString key) {
     QString final;
-
-    if(key.toUtf8().size() < 24){
-        key.toUtf8().resize(24, 0);
-    }
     QByteArray keyAsBytes = key.toUtf8();
+    if(keyAsBytes.size() < 24){
+        keyAsBytes.resize(24, 0);
+    }
+
     SecByteBlock keyAsSecByteBlock(reinterpret_cast<const byte*>(keyAsBytes.constData()), keyAsBytes.size());
     CBC_Mode<AES>::Decryption d;
     std::string unhexed;

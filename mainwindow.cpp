@@ -16,6 +16,7 @@
 #include <QString>
 QString homedir = "";
 // diese von kaan 2
+// du bastard lol
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
@@ -56,6 +57,7 @@ void MainWindow::on_open_file_triggered()
 {
     QListWidget* services = ui->services;
     QListWidget* passwords = ui->passwords;
+    QString t;
     QString decryptedData;
     QString master;
     QString encData;
@@ -70,8 +72,9 @@ void MainWindow::on_open_file_triggered()
                   QTextStream s(&fl);
                   encData = s.readAll();
     master = QInputDialog::getText(this, "MASTER PASSWORT EINGEBEN", "GEBE DAS MASTER PASSWORT FÜr DIESE DATEI EIN:", QLineEdit::Normal, "12345678");
-    decryptedData = decrypt192(encData, master);
-    qInfo() << decryptedData;
+    t = encrypt192("anus", "abcd");
+    QString z = decrypt192(t, "anus");
+    qDebug() << z;
     return;
     contentList = decryptedData.split("PW;");
     qInfo() << contentList;
